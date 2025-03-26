@@ -11,3 +11,6 @@ class WalletInfoResponse(BaseModel):
     bandwidth: int
     energy: int
     query_time: datetime
+
+    class Config:
+        from_attributes = True
