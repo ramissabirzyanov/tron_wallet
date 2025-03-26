@@ -9,18 +9,18 @@ class WalletService:
         self.client = Tron(network=network)
 
     async def is_valid_tron_address(self, wallet_address: str):
-            if await asyncio.to_thread(self.client.is_address, wallet_address):
-                 return True
-            raise ValueError(f"Неверный TRON-адрес: {wallet_address}")
+        if await asyncio.to_thread(self.client.is_address, wallet_address):
+            return True
+        raise ValueError(f"Неверный TRON-адрес: {wallet_address}")
 
     async def get_wallet_data(self, wallet_address: str):
         """ Получает баланс, bandwidth и energy, включая использованные и лимиты """
         try:
             await self.is_valid_tron_address(wallet_address)
             account, resource_info = await asyncio.gather(
-            asyncio.to_thread(self.client.get_account, wallet_address),
-            asyncio.to_thread(self.client.get_account_resource, wallet_address)
-        )
+                asyncio.to_thread(self.client.get_account, wallet_address),
+                asyncio.to_thread(self.client.get_account_resource, wallet_address)
+            )
             balance = account.get("balance", 0) / 1_000_000
 
             bandwidth_limit = resource_info.get("freeNetLimit", 0)

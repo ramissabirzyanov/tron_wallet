@@ -28,6 +28,6 @@ async def get_wallet_info(
 
 @router.get('/wallets', response_model=list[WalletInfoResponse])
 async def get_last_wallets(
-     db_repo: DB_Repository = Depends(get_db_repository)
+    db_repo: DB_Repository = Depends(get_db_repository)
 ):
-    return await db_repo.get_last_wallets() 
+    return await db_repo.get_last_wallets()

@@ -6,14 +6,13 @@ from app.core.models import Wallet
 
 class DB_Repository:
     def __init__(self, db: AsyncSession):
-        self.db =db
-
+        self.db = db
 
     async def get_last_wallets(self, skip: int = 0, limit: int = 10):
         """ Получает список последних записей с пагинацией """
         query = select(Wallet).order_by(Wallet.timestamp.desc()).offset(skip).limit(limit)
         result = await self.db.execute(query)
-        return result.scalars().all() 
+        return result.scalars().all()
 
     async def add_wallet(self, wallet_data: dict) -> Wallet:
         """Добавляет запрос кошелька в БД"""
