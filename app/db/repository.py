@@ -17,8 +17,8 @@ class DB_Repository:
     async def add_wallet(self, wallet_data: dict) -> Wallet:
         """Добавляет запрос кошелька в БД"""
         wallet = Wallet(
-            address=wallet_data["address"],
-            trx_balance=wallet_data["balance"],
+            address=wallet_data["wallet_address"],
+            balance=wallet_data["trx_balance"],
             bandwidth=wallet_data["bandwidth"],
             energy=wallet_data["energy"],
         )

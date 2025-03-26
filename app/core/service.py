@@ -23,26 +23,22 @@ class WalletService:
             )
             balance = account.get("balance", 0) / 1_000_000
 
-            bandwidth_limit = resource_info.get("freeNetLimit", 0)
-            bandwidth_used = resource_info.get("freeNetUsed", 0)
-            bandwidth_available = max(bandwidth_limit - bandwidth_used, 0)
+            bandwidth_free_limit = resource_info.get("freeNetLimit", 0)
+            bandwidth_total_limit = resource_info.get("TotalNetLimit", 0)
 
-            energy_limit = resource_info.get("energyLimit", 0)
+            energy_total_limit = resource_info.get("TotalEnergyLimit", 0)
             energy_used = resource_info.get("energyUsed", 0)
-            energy_available = max(energy_limit - energy_used, 0)
 
             wallet_data = {
                 "wallet_address": wallet_address,
                 "trx_balance": balance,
                 "bandwidth": {
-                    "limit": bandwidth_limit,
-                    "used": bandwidth_used,
-                    "available": bandwidth_available
+                    "free_limit": bandwidth_free_limit,
+                    "total_limit": bandwidth_total_limit,
                 },
                 "energy": {
-                    "limit": energy_limit,
+                    "limit": energy_total_limit,
                     "used": energy_used,
-                    "available": energy_available
                 }
             }
 

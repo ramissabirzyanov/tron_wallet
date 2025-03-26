@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from decimal import Decimal
 
 
 class WalletInfoRequest(BaseModel):
@@ -8,10 +9,10 @@ class WalletInfoRequest(BaseModel):
 
 class WalletInfoResponse(BaseModel):
     wallet_address: str
-    trx_balance: int
-    bandwidth: int
-    energy: int
-    query_time: datetime
+    trx_balance: Decimal
+    bandwidth: dict
+    energy: dict
+    query_time: datetime = datetime.now()
 
     class Config:
         from_attributes = True
