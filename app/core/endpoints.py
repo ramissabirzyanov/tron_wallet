@@ -33,7 +33,7 @@ async def get_last_wallets(
             WalletInfoResponse(
                 address=w.address, 
                 balance=w.balance, 
-                bandwidth=w.bandwidth, 
+                bandwidth=w.bandwidth,
                 energy=w.energy, 
                 query_time=w.timestamp
             ) for w in wallets

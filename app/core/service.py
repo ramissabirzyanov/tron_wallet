@@ -4,9 +4,11 @@ from datetime import datetime
 from tronpy import Tron
 from tronpy.exceptions import AddressNotFound
 
+from app.core.settings import settings
+
 
 class WalletService:
-    def __init__(self, network: str = "shasta"):
+    def __init__(self, network: str = settings.TRON_NETWORK):
         self.client = Tron(network=network)
 
     async def is_valid_tron_address(self, wallet_address: str):

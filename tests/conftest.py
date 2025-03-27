@@ -1,41 +1,47 @@
+import requests
 import pytest
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-
-from app.db.base import Base
-from app.db.session import get_db
-from app.main import app
+from unittest.mock import AsyncMock
 
 
-TEST_DATABASE_URL = "postgresql+asyncpg://user:password@localhost/test_db"
+@pytest.fixture
+def test_wallet_data():
+    """Фикстура для получения реальных данных кошелька"""
 
+    url = "https://api.shasta.trongrid.io/wallet/getaccount"
+    payload = {
+        "address": "TZ4UXDV5ZhNW7fb2AMSbgfAEZ7hWsnYS2g",
+        "visible": True
+    }
+    headers = {"accept": "application/json", "content-type": "application/json"}
+    
+    response = requests.post(url, json=payload, headers=headers)
+    data = response.json()
+    return data
 
-engine = create_async_engine(TEST_DATABASE_URL, echo=True)
-TestingSessionLocal = async_sessionmaker(autocommit=False, autoflush=False, bind=engine)
+@pytest.fixture
+def mock_wallet_service():
+    service = AsyncMock()
+    service.get_wallet_data = AsyncMock()
+    return service
 
+@pytest.fixture
+def mock_repository():
+    repo = AsyncMock()
+    repo.add_wallet = AsyncMock()
+    repo.get_last_wallets = AsyncMock(return_value=[])
+    return repo
 
-@pytest.fixture(scope="function", autouse=True)
-async def setup_test_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+@pytest.fixture
+def unit_test_mock_wallet():
+    wallet_data = {
+        "address": "MockAddress",
+        "balance": 100.0,
+        "timestamp": "2025-03-27T00:00:00",
+        "bandwidth": {
+            "free": {"limit": 1000, "used": 100, "available": 900},
+            "staked": {"limit": 5000, "used": 1000, "available": 4000}
+        },
+        "energy": {"limit": 10000, "used": 2000, "available": 8000}
+    }
 
-    yield
-
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-
-@pytest.fixture()
-async def db_session():
-    async with TestingSessionLocal() as session:
-        yield session
-
-async def override_get_db():
-    async with TestingSessionLocal() as session:
-        yield session
-
-app.dependency_overrides[get_db] = override_get_db
-
-@pytest.fixture()
-async def client():
-    async with AsyncClient(app=app, base_url="http://test") as client:
-        yield client
+    return wallet_data
