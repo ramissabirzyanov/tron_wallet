@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 
 from tronpy import Tron
 from tronpy.exceptions import AddressNotFound
@@ -36,8 +37,9 @@ class WalletService:
             energy_available = max(energy_limit - energy_used, 0)
 
             wallet_data = {
-                "wallet_address": wallet_address,
-                "trx_balance": balance,
+                "address": wallet_address,
+                "balance": balance,
+                "timestamp": datetime.now(),
                 "bandwidth": {
                     "free": {
                         "limit": free_bandwidth_limit,

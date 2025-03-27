@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.schemas import WalletInfoRequest, WalletInfoResponse
-from app.db.session import get_db
 from app.core.service import WalletService
 from app.db.repository import DB_Repository
 from app.core.dependencies import get_db_repository, get_wallet_service
@@ -17,7 +15,7 @@ async def get_wallet_info(
     db_repo: DB_Repository = Depends(get_db_repository),
     wallet_service: WalletService = Depends(get_wallet_service)
 ):
-    wallet_data = await wallet_service.get_wallet_data(request.wallet_address)
+    wallet_data = await wallet_service.get_wallet_data(request.address)
     if not wallet_data:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -30,4 +28,13 @@ async def get_wallet_info(
 async def get_last_wallets(
     db_repo: DB_Repository = Depends(get_db_repository)
 ):
-    return await db_repo.get_last_wallets()
+    wallets = await db_repo.get_last_wallets()
+    return [
+            WalletInfoResponse(
+                address=w.address, 
+                balance=w.balance, 
+                bandwidth=w.bandwidth, 
+                energy=w.energy, 
+                query_time=w.timestamp
+            ) for w in wallets
+    ]

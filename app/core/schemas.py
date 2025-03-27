@@ -4,15 +4,15 @@ from decimal import Decimal
 
 
 class WalletInfoRequest(BaseModel):
-    wallet_address: str
+    address: str
 
 
 class WalletInfoResponse(BaseModel):
-    wallet_address: str
-    trx_balance: Decimal
+    address: str
+    balance: Decimal
     bandwidth: dict
     energy: dict
-    query_time: datetime = datetime.now()
+    timestamp: datetime = datetime.now()
 
     class Config:
         from_attributes = True

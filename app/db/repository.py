@@ -1,4 +1,5 @@
 from sqlalchemy.future import select
+from sqlalchemy.dialects.postgresql import insert
 
 from app.db.session import AsyncSession
 from app.core.models import Wallet
@@ -14,15 +15,20 @@ class DB_Repository:
         result = await self.db.execute(query)
         return result.scalars().all()
 
+
     async def add_wallet(self, wallet_data: dict) -> Wallet:
         """Добавляет запрос кошелька в БД"""
-        wallet = Wallet(
-            address=wallet_data["wallet_address"],
-            balance=wallet_data["trx_balance"],
-            bandwidth=wallet_data["bandwidth"],
-            energy=wallet_data["energy"],
-        )
-        self.db.add(wallet)
+        try:
+            query = insert(Wallet).values(**wallet_data).on_conflict_do_update(
+                index_elements=["address"],
+                set_={
+                    "balance": wallet_data["balance"],
+                    "bandwidth": wallet_data["bandwidth"],
+                    "energy": wallet_data["energy"],
+                    "timestamp": wallet_data["timestamp"],
+                }
+            )
+        except KeyError:
+            raise KeyError("Check wallet_data")
+        await self.db.execute(query)
         await self.db.commit()
-        await self.db.refresh(wallet)
-        return wallet

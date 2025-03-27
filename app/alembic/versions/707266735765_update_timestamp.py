@@ -1,8 +1,8 @@
-"""upgrade timestamp
+"""update timestamp
 
-Revision ID: 300d00a8e9ec
-Revises: 665aa966d8af
-Create Date: 2025-03-26 17:17:25.649093
+Revision ID: 707266735765
+Revises: 04b638ba3ec5
+Create Date: 2025-03-27 12:42:34.723405
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '300d00a8e9ec'
-down_revision: Union[str, None] = '665aa966d8af'
+revision: str = '707266735765'
+down_revision: Union[str, None] = '04b638ba3ec5'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
