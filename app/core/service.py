@@ -23,9 +23,13 @@ class WalletService:
             )
             balance = account.get("balance", 0) / 1_000_000
 
-            bandwidth_limit = resource_info.get("freeNetLimit", 0)
-            bandwidth_used = resource_info.get("freeNetUsed", 0)
-            bandwidth_available = max(bandwidth_limit - bandwidth_used, 0)
+            free_bandwidth_limit = resource_info.get("freeNetLimit", 0)
+            free_bandwidth_used = resource_info.get("freeNetUsed", 0)
+            free_bandwidth_available = max(free_bandwidth_limit - free_bandwidth_used, 0)
+
+            staked_bandwidth_limit = resource_info.get("NetLimit", 0)
+            staked_bandwidth_used = resource_info.get("NetUsed", 0)
+            staked_bandwidth_available = max(staked_bandwidth_limit - staked_bandwidth_used, 0)
 
             energy_limit = resource_info.get("energyLimit", 0)
             energy_used = resource_info.get("energyUsed", 0)
@@ -35,9 +39,16 @@ class WalletService:
                 "wallet_address": wallet_address,
                 "trx_balance": balance,
                 "bandwidth": {
-                    "limit": bandwidth_limit,
-                    "used": bandwidth_used,
-                    "available": bandwidth_available
+                    "free": {
+                        "limit": free_bandwidth_limit,
+                        "used": free_bandwidth_used,
+                        "available": free_bandwidth_available
+                    },
+                    "staked":{
+                        "limit": staked_bandwidth_limit,
+                        "used": staked_bandwidth_used,
+                        "available": staked_bandwidth_available
+                    }
                 },
                 "energy": {
                     "limit": energy_limit,
