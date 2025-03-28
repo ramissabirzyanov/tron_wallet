@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+from typing import Optional
 
 from tronpy import Tron
 from tronpy.exceptions import AddressNotFound
@@ -8,16 +9,32 @@ from app.core.settings import settings
 
 
 class WalletService:
+    """
+    Сервис для работы с кошельками.
+    Этот класс предоставляет методы для проверки действительности адресов кошельков,
+    получения данных о кошельке, таких как баланс, лимиты и использование bandwidth и энергии.
+    """
+
     def __init__(self, network: str = settings.TRON_NETWORK):
+        """
+        Инициализирует сервис с указанной сетью TRON.
+        """
         self.client = Tron(network=network)
 
-    async def is_valid_tron_address(self, wallet_address: str):
+    async def is_valid_tron_address(self, wallet_address: str) -> bool:
+        """
+        Проверяет, является ли указанный адрес валидным адресом TRON.
+        """
         if await asyncio.to_thread(self.client.is_address, wallet_address):
             return True
         raise ValueError(f"Неверный TRON-адрес: {wallet_address}")
 
-    async def get_wallet_data(self, wallet_address: str):
-        """ Получает баланс, bandwidth и energy, включая использованные и лимиты """
+    async def get_wallet_data(self, wallet_address: str) -> Optional[dict]:
+        """ Получает данные о кошельке, включая баланс, bandwidth и energy,
+        а также их лимиты и использование.
+        Метод собирает информацию о кошельке с помощью библиотеки tronpy и
+        возвращает структурированные данные, включая баланс и ресурсы.
+        """
         try:
             await self.is_valid_tron_address(wallet_address)
             account, resource_info = await asyncio.gather(
@@ -48,7 +65,7 @@ class WalletService:
                         "used": free_bandwidth_used,
                         "available": free_bandwidth_available
                     },
-                    "staked":{
+                    "staked": {
                         "limit": staked_bandwidth_limit,
                         "used": staked_bandwidth_used,
                         "available": staked_bandwidth_available

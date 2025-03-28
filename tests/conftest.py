@@ -1,38 +1,38 @@
-import requests
 import pytest
 from unittest.mock import AsyncMock
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.repository import DB_Repository
+
+
+@pytest.fixture(scope="session")
+def mock_db_session():
+    """
+    Мокаем сессию базы данных (AsyncSession) для тестов.
+    Эта фикстура создаёт и настраивает mock-объект для работы с сессией базы данных.
+    """
+    session = AsyncMock(spec=AsyncSession)
+    session.execute = AsyncMock()
+    session.commit = AsyncMock()
+    return session
+
+
+@pytest.fixture
+def mock_repository(mock_db_session):
+    """
+    Мокаем репозиторий для работы с базой данных.
+    Эта фикстура создаёт объект репозитория DB_Repository с замоканной сессией базы данных.
+    """
+    repo = DB_Repository(mock_db_session)
+    return repo
 
 
 @pytest.fixture
 def test_wallet_data():
-    """Фикстура для получения реальных данных кошелька"""
-
-    url = "https://api.shasta.trongrid.io/wallet/getaccount"
-    payload = {
-        "address": "TZ4UXDV5ZhNW7fb2AMSbgfAEZ7hWsnYS2g",
-        "visible": True
-    }
-    headers = {"accept": "application/json", "content-type": "application/json"}
-    
-    response = requests.post(url, json=payload, headers=headers)
-    data = response.json()
-    return data
-
-@pytest.fixture
-def mock_wallet_service():
-    service = AsyncMock()
-    service.get_wallet_data = AsyncMock()
-    return service
-
-@pytest.fixture
-def mock_repository():
-    repo = AsyncMock()
-    repo.add_wallet = AsyncMock()
-    repo.get_last_wallets = AsyncMock(return_value=[])
-    return repo
-
-@pytest.fixture
-def unit_test_mock_wallet():
+    """
+    Мокаем данные кошелька для тестов.
+    Эта фикстура возвращает фиктивные данные кошелька в виде словаря,
+    которые могут быть использованы в тестах.
+    """
     wallet_data = {
         "address": "MockAddress",
         "balance": 100.0,

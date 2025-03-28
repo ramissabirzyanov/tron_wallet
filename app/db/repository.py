@@ -9,15 +9,17 @@ class DB_Repository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def get_last_wallets(self, skip: int = 0, limit: int = 10):
+    async def get_last_wallets(self, skip: int = 0, limit: int = 10) -> list[Wallet]:
         """ Получает список последних записей с пагинацией """
+
         query = select(Wallet).order_by(Wallet.timestamp.desc()).offset(skip).limit(limit)
         result = await self.db.execute(query)
         return result.scalars().all()
 
-
     async def add_wallet(self, wallet_data: dict) -> Wallet:
-        """Добавляет запрос кошелька в БД"""
+        """Добавляет запрос кошелька в БД.
+        Если в БД имеется кошелек с данным адресом, то данные обновляются.
+        """
         try:
             query = insert(Wallet).values(**wallet_data).on_conflict_do_update(
                 index_elements=["address"],

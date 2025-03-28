@@ -1,33 +1,39 @@
 import pytest
-from unittest.mock import patch
 from httpx import AsyncClient, ASGITransport
-
 from app.main import app
+from app.db.repository import DB_Repository
 
 
 @pytest.mark.asyncio
-async def test_with_data_from_tron_api(test_wallet_data, mock_wallet_service, mock_repository):
+async def test_with_data_from_tron_api():
+    """
+    Тестируем API метод /api/wallet_info, который получает информацию о кошельке
+    с Tron-сети по указанному адресу. Данные для корректности запроса взяты с API Tron.
+    """
     test_address = "TZ4UXDV5ZhNW7fb2AMSbgfAEZ7hWsnYS2g"
-    mock_wallet_service.get_wallet_data.return_value = test_wallet_data
-    
-    with (
-        patch("app.core.dependencies.get_wallet_service", return_value=mock_wallet_service),
-        patch("app.core.dependencies.get_db_repository", return_value=mock_repository)
-    ):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-            response = await client.post(
-                "/api/wallet_info",
-                json={"address": test_address}
-            )
-        
-            data = response.json()
-            assert response.status_code == 200
-            assert data["address"] == test_wallet_data["address"]
-            assert data["balance"] == str(test_wallet_data["balance"]/1000000)
-            assert "bandwidth" in data
-            assert "energy" in data
-            assert 'free','staked'in data['bandwidth']
-            assert 'available' in data['energy']
-            # Добавим вывод для диагностики
-            print(f"add_wallet called {mock_repository.add_wallet.call_count} times.")
-            print(f"Arguments passed: {mock_repository.add_wallet.call_args}")
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.post(
+            "/api/wallet_info",
+            json={"address": test_address}
+        )
+        data = response.json()
+        assert response.status_code == 200
+        assert data["address"] == test_address
+        assert data["balance"] == str(12818721520 / 1000000)
+        assert "bandwidth" in data
+        assert "energy" in data
+        assert 'free', 'staked' in data['bandwidth']
+        assert 'available' in data['energy']
+
+
+@pytest.mark.asyncio
+async def test_unit_add_wallet_to_db(mock_db_session, test_wallet_data):
+    """Тестируем метод add_wallet отдельно, без FastAPI"""
+    repo = DB_Repository(mock_db_session)
+
+    await repo.add_wallet(test_wallet_data)
+    sql_call = mock_db_session.execute.call_args[0][0]
+
+    assert mock_db_session.execute.call_count == 1
+    assert mock_db_session.commit.call_count == 1
+    assert sql_call.table.name == "wallet_queries"
